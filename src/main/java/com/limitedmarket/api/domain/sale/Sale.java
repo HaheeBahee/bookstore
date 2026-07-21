@@ -16,6 +16,11 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "sale", indexes = {
+        @Index(name = "idx_sale_status_vip_open_at", columnList = "sale_status, vip_open_at"),
+        @Index(name = "idx_sale_status_general_open_at", columnList = "sale_status, general_open_at"),
+        @Index(name = "idx_sale_status_close_at", columnList = "sale_status, close_at")
+})
 public class Sale extends BaseEntity {
 
     @Id

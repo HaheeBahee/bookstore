@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "order_status_history", indexes = {
+        @Index(name = "idx_order_history_order_id_created_at", columnList = "order_id, created_at")
+})
 public class OrderStatusHistory extends BaseEntity {
 
     @Id

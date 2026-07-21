@@ -12,6 +12,9 @@ import java.math.BigDecimal;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "payment", indexes = {
+        @Index(name = "idx_payment_order_id_status", columnList = "order_id, payment_status")
+})
 public class Payment extends BaseEntity {
 
     @Id
