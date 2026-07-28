@@ -46,7 +46,7 @@ public class AuthService {
         memberRepository.save(member);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public TokenResponse login(LoginRequest request) {
 
         Member member = memberRepository.findByEmail(request.email())
@@ -68,7 +68,7 @@ public class AuthService {
         return new TokenResponse(accessToken, refreshToken);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public TokenResponse reissue(String refreshToken) {
 
         if (!jwtProvider.validateToken(refreshToken)
