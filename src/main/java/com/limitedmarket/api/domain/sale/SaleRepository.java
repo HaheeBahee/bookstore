@@ -14,7 +14,7 @@ import java.util.List;
 public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT s FROM Sale s WHERE s.id IN :ids")
+    @Query("SELECT s FROM Sale s WHERE s.id IN :ids ORDER BY s.id ASC")
     List<Sale> findAllByIdWithLock(@Param("ids") List<Long> ids);
 
     // 스케줄러용 - 상태 전환 대상 조회
