@@ -24,11 +24,6 @@ public class PendingRequestRecoveryScheduler {
     }
 
     private void recover(String requestId) {
-        String lockValue = redisStockService.tryAcquireRecoveryLock(requestId);
-        if (lockValue == null) {
-            return;
-        }
-
         try {
             if (orderRepository.existsByRequestId(requestId)) {
                 redisStockService.completeReservation(requestId);
@@ -41,8 +36,6 @@ public class PendingRequestRecoveryScheduler {
             log.warn("[PendingRecovery] 미완료 주문 재고 복구 - requestId={}", requestId);
         } catch (Exception e) {
             log.error("[PendingRecovery] 복구 실패 - requestId={}", requestId, e);
-        } finally {
-            redisStockService.releaseRecoveryLock(requestId, lockValue);
         }
     }
 }

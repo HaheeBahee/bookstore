@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class RedisStockService {
@@ -23,26 +21,22 @@ public class RedisStockService {
     private static final String PENDING_REQUESTS_KEY = "pending:requests";
     private static final long PENDING_TIMEOUT_MILLIS = Duration.ofMinutes(2).toMillis();
     private static final long TERMINAL_REQUEST_TTL_MILLIS = Duration.ofHours(24).toMillis();
-    private static final long RECOVERY_LOCK_TTL_MILLIS = Duration.ofSeconds(30).toMillis();
 
     private final StringRedisTemplate redisTemplate;
     private final RedisScript<Long> decreaseStockScript;
     private final RedisScript<Long> rollbackReservationScript;
     private final RedisScript<Long> completeReservationScript;
-    private final RedisScript<Long> releaseLockScript;
 
     public RedisStockService(
             StringRedisTemplate redisTemplate,
             @Qualifier("decreaseStockScript") RedisScript<Long> decreaseStockScript,
             @Qualifier("rollbackReservationScript") RedisScript<Long> rollbackReservationScript,
-            @Qualifier("completeReservationScript") RedisScript<Long> completeReservationScript,
-            @Qualifier("releaseLockScript") RedisScript<Long> releaseLockScript
+            @Qualifier("completeReservationScript") RedisScript<Long> completeReservationScript
     ) {
         this.redisTemplate = redisTemplate;
         this.decreaseStockScript = decreaseStockScript;
         this.rollbackReservationScript = rollbackReservationScript;
         this.completeReservationScript = completeReservationScript;
-        this.releaseLockScript = releaseLockScript;
     }
 
     // Redis 재고 키가 없을 때만 DB 재고로 초기화
@@ -126,26 +120,6 @@ public class RedisStockService {
             }
         });
         return quantities;
-    }
-
-    public String tryAcquireRecoveryLock(String requestId) {
-        String lockKey = "lock:request-recovery:" + requestId;
-        String lockValue = UUID.randomUUID().toString();
-        Boolean acquired = redisTemplate.opsForValue().setIfAbsent(
-                lockKey,
-                lockValue,
-                RECOVERY_LOCK_TTL_MILLIS,
-                TimeUnit.MILLISECONDS
-        );
-        return Boolean.TRUE.equals(acquired) ? lockValue : null;
-    }
-
-    public void releaseRecoveryLock(String requestId, String lockValue) {
-        redisTemplate.execute(
-                releaseLockScript,
-                List.of("lock:request-recovery:" + requestId),
-                lockValue
-        );
     }
 
     // 재고 복구 - 차감한 재고 복구
