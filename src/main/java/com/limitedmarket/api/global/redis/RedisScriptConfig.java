@@ -16,4 +16,28 @@ public class RedisScriptConfig {
         script.setResultType(Long.class);
         return script;
     }
+
+    @Bean
+    public RedisScript<Long> rollbackReservationScript() {
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        script.setLocation(new ClassPathResource("scripts/rollback-reservation.lua"));
+        script.setResultType(Long.class);
+        return script;
+    }
+
+    @Bean
+    public RedisScript<Long> completeReservationScript() {
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        script.setLocation(new ClassPathResource("scripts/complete-reservation.lua"));
+        script.setResultType(Long.class);
+        return script;
+    }
+
+    @Bean
+    public RedisScript<Long> releaseLockScript() {
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        script.setLocation(new ClassPathResource("scripts/release-lock.lua"));
+        script.setResultType(Long.class);
+        return script;
+    }
 }

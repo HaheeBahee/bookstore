@@ -62,7 +62,7 @@ class OrderCancelRedisTest {
                 "password", "테스터");
         memberRepository.save(member);
 
-        redisStockService.initStock(sale.getId(), 100);
+        redisStockService.initStockIfAbsent(sale.getId(), 100);
     }
 
     @AfterEach
@@ -80,13 +80,17 @@ class OrderCancelRedisTest {
     @DisplayName("주문 취소 성공 시 Redis 재고가 복구된다")
     void cancel_success_redis_restored() {
         // given
-        Order order = Order.create(member, BigDecimal.valueOf(30000));
+        Order order = Order.create(
+                member,
+                BigDecimal.valueOf(30000),
+                UUID.randomUUID().toString()
+        );
         orderRepository.save(order);
         OrderItem orderItem = OrderItem.create(order, sale, 2);
         orderItemRepository.save(orderItem);
         sale.decreaseStock(2);
         saleRepository.save(sale);
-        redisStockService.decrease(sale.getId(), 2);
+        redisTemplate.opsForValue().decrement("sale:stock:" + sale.getId(), 2);
 
         // when
         orderService.cancel(order.getId(), member.getId());

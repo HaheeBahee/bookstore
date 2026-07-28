@@ -43,7 +43,7 @@ public class SaleService {
                 request.closeAt());
 
         saleRepository.save(sale);
-        redisStockService.initStock(sale.getId(), sale.getTotalQuantity());
+        redisStockService.initStockIfAbsent(sale.getId(), sale.getTotalQuantity());
         return SaleCreateResponse.from(sale);
     }
 

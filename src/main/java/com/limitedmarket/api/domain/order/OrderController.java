@@ -27,9 +27,10 @@ public class OrderController {
 
     @PostMapping
     @Operation(summary = "주문 생성", description = "로그인 후 사용 가능합니다. 상단 Authorize 버튼에 토큰을 먼저 입력하세요")
-    public ResponseEntity<OrderCreateResponse> create(@RequestBody @Valid OrderCreateRequest request,
+    public ResponseEntity<OrderCreateResponse> create(@RequestHeader("Idempotency-Key") String requestId,
+                                                      @RequestBody @Valid OrderCreateRequest request,
                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
-        OrderCreateResponse response = orderService.create(request, userDetails.getMemberId());
+        OrderCreateResponse response = orderService.create(request, userDetails.getMemberId(), requestId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

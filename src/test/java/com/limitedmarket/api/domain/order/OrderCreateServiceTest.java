@@ -84,7 +84,7 @@ class OrderCreateServiceTest {
 
         // when - SALE_NOT_FOUND 예외 발생
         assertThatThrownBy(() ->
-                orderCreateService.create(member, invalidSaleIds, quantityMap)
+                orderCreateService.create(member, invalidSaleIds, quantityMap, UUID.randomUUID().toString())
         ).isInstanceOf(Exception.class);
 
         // then - Order가 롤백되어 개수 그대로
@@ -99,7 +99,12 @@ class OrderCreateServiceTest {
         Map<Long, Integer> quantityMap = Map.of(sale.getId(), 1);
 
         // when
-        var response = orderCreateService.create(member, saleIds, quantityMap);
+        var response = orderCreateService.create(
+                member,
+                saleIds,
+                quantityMap,
+                UUID.randomUUID().toString()
+        );
 
         // then
         assertThat(response).isNotNull();

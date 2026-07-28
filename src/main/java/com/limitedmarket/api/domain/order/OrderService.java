@@ -34,10 +34,18 @@ public class OrderService {
     private final OrderCreateService orderCreateService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public OrderCreateResponse create(OrderCreateRequest request, Long memberId) {
+    public OrderCreateResponse create(OrderCreateRequest request, Long memberId, String requestId) {
+
+        validateRequestId(requestId);
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        Optional<Order> existingOrder = orderRepository.findByRequestIdAndMemberId(requestId, memberId);
+        if (existingOrder.isPresent()) {
+            redisStockService.completeReservation(requestId);
+            return OrderCreateResponse.from(existingOrder.get());
+        }
 
         List<Long> saleIds = request.items().stream()
                 .map(OrderItemRequest::saleId)
@@ -54,28 +62,27 @@ public class OrderService {
                         OrderItemRequest::quantity
                 ));
 
-        // Redis에서 먼저 재고 차감
-        List<Long> decreasedSaleIds = new ArrayList<>();
+        // Redis에서 모든 재고 차감과 PENDING 기록을 원자적으로 처리
+        redisStockService.reserve(requestId, quantityBySaleId);
+
+        OrderCreateResponse response;
         try {
-            for (Long saleId : saleIds) {
-                redisStockService.decrease(saleId, quantityBySaleId.get(saleId));
-                decreasedSaleIds.add(saleId);
-            }
-        } catch (CustomException e) {
-            for (Long saleId : decreasedSaleIds) {
-                redisStockService.restore(saleId, quantityBySaleId.get(saleId));
-            }
+            response = orderCreateService.create(member, saleIds, quantityBySaleId, requestId);
+        } catch (Exception e) {
+            redisStockService.rollbackReservation(requestId, quantityBySaleId);
             throw e;
         }
 
-        // DB 트랜잭션
+        // OrderCreateService의 DB 트랜잭션 커밋이 끝난 뒤 COMPLETED로 변경
+        redisStockService.completeReservation(requestId);
+        return response;
+    }
+
+    private void validateRequestId(String requestId) {
         try {
-            return orderCreateService.create(member, saleIds, quantityBySaleId);
-        } catch (Exception e) {
-            for (Long saleId : saleIds) {
-                redisStockService.restore(saleId, quantityBySaleId.get(saleId));
-            }
-            throw e;
+            UUID.fromString(requestId);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
         }
     }
 

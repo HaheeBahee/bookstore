@@ -25,7 +25,7 @@ public class RedisStockInitializer implements ApplicationRunner {
         );
 
         for (Sale sale : activeSales) {
-            redisStockService.initStock(sale.getId(), sale.getRemainQuantity());
+            redisStockService.initStockIfAbsent(sale.getId(), sale.getRemainQuantity());
         }
     }
 }

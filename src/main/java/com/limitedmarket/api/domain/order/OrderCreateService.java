@@ -25,8 +25,13 @@ public class OrderCreateService {
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final SaleRepository saleRepository;
 
-    @Transactional
-    public OrderCreateResponse create(Member member, List<Long> saleIds, Map<Long, Integer> quantityBySaleId) {
+    @Transactional(timeout = 30)
+    public OrderCreateResponse create(
+            Member member,
+            List<Long> saleIds,
+            Map<Long, Integer> quantityBySaleId,
+            String requestId
+    ) {
 
         List<Long> sortedSaleIds = saleIds.stream().sorted().toList();
         List<Sale> sales = saleRepository.findAllByIdWithLock(sortedSaleIds);
@@ -58,7 +63,7 @@ public class OrderCreateService {
             );
         }
 
-        Order order = Order.create(member, totalPrice);
+        Order order = Order.create(member, totalPrice, requestId);
         orderRepository.save(order);
 
         List<OrderItem> orderItems = new ArrayList<>();

@@ -32,6 +32,7 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", "주문을 찾을 수 없습니다"),
     ORDER_CANCEL_FAILED(HttpStatus.BAD_REQUEST, "ORDER_CANCEL_FAILED", "취소할 수 없는 주문입니다"),
     DUPLICATE_SALE_ITEM(HttpStatus.BAD_REQUEST, "DUPLICATE_SALE_ITEM", "중복된 판매 상품이 포함되어 있습니다"),
+    ORDER_REQUEST_IN_PROGRESS(HttpStatus.CONFLICT, "ORDER_REQUEST_IN_PROGRESS", "동일한 주문 요청을 처리 중입니다"),
 
     // 결제
     PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "PAYMENT_FAILED", "결제에 실패했습니다"),

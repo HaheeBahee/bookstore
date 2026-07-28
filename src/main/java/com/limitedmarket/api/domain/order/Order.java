@@ -26,6 +26,9 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @Column(name = "request_id", nullable = false, unique = true)
+    private String requestId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus orderStatus;
@@ -35,10 +38,12 @@ public class Order extends BaseEntity {
 
     public static Order create(
             Member member,
-            BigDecimal totalPrice
+            BigDecimal totalPrice,
+            String requestId
     ) {
         Order order = new Order();
         order.member = member;
+        order.requestId = requestId;
         order.orderStatus = OrderStatus.PENDING;
         order.totalPrice = totalPrice;
         return order;
