@@ -14,6 +14,10 @@ import java.util.Date;
 @Component
 public class JwtProvider {
 
+    private static final String TOKEN_TYPE_CLAIM = "tokenType";
+    private static final String ACCESS_TOKEN_TYPE = "ACCESS";
+    private static final String REFRESH_TOKEN_TYPE = "REFRESH";
+
     private final SecretKey secretKey;
     private final long accessExpiration;
     private final long refreshExpiration;
@@ -32,6 +36,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .subject(String.valueOf(memberId))
                 .claim("role", role.name())
+                .claim(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessExpiration))
                 .signWith(secretKey)
@@ -42,6 +47,7 @@ public class JwtProvider {
     public String createRefreshToken(Long memberId) {
         return Jwts.builder()
                 .subject(String.valueOf(memberId))
+                .claim(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
                 .signWith(secretKey)
@@ -79,6 +85,14 @@ public class JwtProvider {
     // 토큰에서 role 추출
     public Role getRole(String token) {
         return Role.valueOf(parseClaims(token).get("role", String.class));
+    }
+
+    public boolean isAccessToken(String token) {
+        return ACCESS_TOKEN_TYPE.equals(parseClaims(token).get(TOKEN_TYPE_CLAIM, String.class));
+    }
+
+    public boolean isRefreshToken(String token) {
+        return REFRESH_TOKEN_TYPE.equals(parseClaims(token).get(TOKEN_TYPE_CLAIM, String.class));
     }
 
     // 토큰 남은 유효시간 반환 - 로그아웃 시 Redis 블랙리스트에 등록할 TTL

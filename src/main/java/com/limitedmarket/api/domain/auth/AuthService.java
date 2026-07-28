@@ -71,7 +71,8 @@ public class AuthService {
     @Transactional(readOnly = true)
     public TokenResponse reissue(String refreshToken) {
 
-        if (!jwtProvider.validateToken(refreshToken)) {
+        if (!jwtProvider.validateToken(refreshToken)
+                || !jwtProvider.isRefreshToken(refreshToken)) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
@@ -85,6 +86,11 @@ public class AuthService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
+        if (member.getMemberStatus() == MemberStatus.WITHDRAWN) {
+            redisService.deleteRefreshToken(memberId);
+            throw new CustomException(ErrorCode.MEMBER_WITHDRAWN);
+        }
+
         String newAccessToken = jwtProvider.createAccessToken(member.getId(), member.getRole());
         String newRefreshToken = jwtProvider.createRefreshToken(member.getId());
         redisService.saveRefreshToken(member.getId(), newRefreshToken, jwtProperties.refreshTokenExpiration(), TimeUnit.MILLISECONDS);
@@ -97,4 +103,5 @@ public class AuthService {
         redisService.addToBlacklist(accessToken, remainingExpiration);
         redisService.deleteRefreshToken(memberId);
     }
+
 }

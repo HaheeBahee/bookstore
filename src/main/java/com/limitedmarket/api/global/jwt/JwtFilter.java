@@ -33,7 +33,9 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = extractToken(request);
 
         // 2. 토큰 검증 - 서명, 만료시간 등 검증
-        if (StringUtils.hasText(token) && jwtProvider.validateToken(token)) {
+        if (StringUtils.hasText(token)
+                && jwtProvider.validateToken(token)
+                && jwtProvider.isAccessToken(token)) {
 
             // 추가: 블랙리스트 확인 (로그아웃된 토큰이면 인증 정보 저장 안 함)
             if (redisService.isBlacklisted(token)) {
