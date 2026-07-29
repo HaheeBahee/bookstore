@@ -3,6 +3,8 @@ package com.limitedmarket.api.domain.payment;
 import com.limitedmarket.api.domain.payment.dto.PaymentRequest;
 import com.limitedmarket.api.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,6 +28,10 @@ public class PaymentController {
             summary = "결제(Mock)",
             description = "실제 결제 연동 없이 결제 완료 처리합니다. impUid는 결제 요청마다 다른 값을 입력해야 합니다."
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "결제 성공"),
+            @ApiResponse(responseCode = "409", description = "결제 요청 처리 불가")
+    })
     public ResponseEntity<Void> pay(@PathVariable Long orderId,
                                     @RequestBody @Valid PaymentRequest request,
                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
