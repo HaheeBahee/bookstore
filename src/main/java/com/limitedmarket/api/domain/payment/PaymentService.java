@@ -29,6 +29,14 @@ public class PaymentService {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
+        if (order.getOrderStatus() == OrderStatus.PAID) {
+            throw new CustomException(ErrorCode.DUPLICATE_PAYMENT);
+        }
+
+        if (order.getOrderStatus() != OrderStatus.PENDING) {
+            throw new CustomException(ErrorCode.PAYMENT_NOT_ALLOWED);
+        }
+
         // Mock 결제에서는 요청 금액과 주문 금액 일치 여부만 검증한다.
         if (request.amount().compareTo(order.getTotalPrice()) != 0) {
             throw new CustomException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);

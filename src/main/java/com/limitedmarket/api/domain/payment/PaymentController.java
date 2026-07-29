@@ -22,7 +22,10 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/{orderId}")
-    @Operation(summary = "결제(Mock)", description = "실제 결제 연동 없이 결제 완료 처리합니다. 추후 포트원 연동 예정")
+    @Operation(
+            summary = "결제(Mock)",
+            description = "실제 결제 연동 없이 결제 완료 처리합니다. impUid는 결제 요청마다 다른 값을 입력해야 합니다."
+    )
     public ResponseEntity<Void> pay(@PathVariable Long orderId,
                                     @RequestBody @Valid PaymentRequest request,
                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
