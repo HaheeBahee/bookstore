@@ -5,6 +5,8 @@ import com.limitedmarket.api.domain.product.dto.ProductCreateResponse;
 import com.limitedmarket.api.domain.product.dto.ProductDetailResponse;
 import com.limitedmarket.api.domain.product.dto.ProductListResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,9 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    @Operation(summary = "상품 등록")
+    @Operation(summary = "상품 등록", description = "ADMIN 권한이 필요합니다")
+    @ApiResponse(responseCode = "201", description = "상품 등록 성공")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ProductCreateResponse> register(@RequestBody @Valid ProductCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.registerProduct(request));
     }

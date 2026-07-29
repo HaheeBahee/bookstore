@@ -3,6 +3,7 @@ package com.limitedmarket.api.domain.payment;
 import com.limitedmarket.api.domain.payment.dto.PaymentRequest;
 import com.limitedmarket.api.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "5. 결제")
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/v1/payments")
 public class PaymentController {
 

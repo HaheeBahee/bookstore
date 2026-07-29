@@ -9,6 +9,7 @@ import com.limitedmarket.api.global.exception.ErrorCode;
 import com.limitedmarket.api.global.jwt.JwtProperties;
 import com.limitedmarket.api.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -89,6 +90,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     @Operation(summary = "로그아웃", description = "Access Token을 블랙리스트에 등록하고 Refresh Token을 삭제합니다")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> logout(HttpServletRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         String authHeader = request.getHeader("Authorization");

@@ -7,6 +7,9 @@ import com.limitedmarket.api.domain.order.dto.OrderListResponse;
 import com.limitedmarket.api.domain.order.dto.OrderStatusHistoryResponse;
 import com.limitedmarket.api.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "4. 주문")
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/v1/order")
 public class OrderController {
 
@@ -27,9 +31,17 @@ public class OrderController {
 
     @PostMapping
     @Operation(summary = "주문 생성", description = "로그인 후 사용 가능합니다. 상단 Authorize 버튼에 토큰을 먼저 입력하세요")
-    public ResponseEntity<OrderCreateResponse> create(@RequestHeader("Idempotency-Key") String requestId,
-                                                      @RequestBody @Valid OrderCreateRequest request,
-                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    @ApiResponse(responseCode = "201", description = "주문 생성 성공")
+    public ResponseEntity<OrderCreateResponse> create(
+            @Parameter(
+                    description = "주문 요청을 식별하는 UUID. 같은 주문을 재요청할 때 동일한 값을 사용합니다.",
+                    required = true,
+                    example = "550e8400-e29b-41d4-a716-446655440000"
+            )
+            @RequestHeader("Idempotency-Key") String requestId,
+            @RequestBody @Valid OrderCreateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         OrderCreateResponse response = orderService.create(request, userDetails.getMemberId(), requestId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

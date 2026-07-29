@@ -4,6 +4,8 @@ import com.limitedmarket.api.domain.sale.dto.SaleCreateRequest;
 import com.limitedmarket.api.domain.sale.dto.SaleCreateResponse;
 import com.limitedmarket.api.domain.sale.dto.SaleListResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,9 @@ public class SaleController {
     private final SaleService saleService;
 
     @PostMapping
-    @Operation(summary = "판매 등록", description = "상품 ID, 판매 가격, 재고 수량, VIP/일반 오픈 시간을 설정합니다")
+    @Operation(summary = "판매 등록", description = "ADMIN 권한으로 상품 ID, 판매 가격, 재고 수량, VIP/일반 오픈 시간을 설정합니다")
+    @ApiResponse(responseCode = "201", description = "판매 등록 성공")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<SaleCreateResponse> create(@RequestBody @Valid SaleCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(saleService.create(request));
     }
