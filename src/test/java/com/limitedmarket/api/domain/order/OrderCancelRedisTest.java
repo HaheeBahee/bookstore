@@ -62,7 +62,7 @@ class OrderCancelRedisTest {
                 "password", "테스터");
         memberRepository.save(member);
 
-        redisStockService.initStockIfAbsent(sale.getId(), 100);
+        redisTemplate.opsForValue().set("sale:stock:" + sale.getId(), "100");
     }
 
     @AfterEach
